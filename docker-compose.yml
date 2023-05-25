@@ -1,0 +1,46 @@
+version: '3.1'
+
+services:
+  auth-db:
+    restart: always
+    image: mongo:4.1.8-xenial
+    container_name: mongo_dev
+    volumes:     
+      - ./.database/mongo/data:/data/db_auth
+    ports:
+      - "27017:27017"
+
+  todo-db:
+    restart: always
+    image: mongo:4.1.8-xenial
+    container_name: mongo_dev_todo
+    volumes:     
+      - ./.database/mongo/data:/data/db_todo
+    ports:
+      - "27018:27017"
+
+  app-4:
+    build:
+      dockerfile: Dockerfile
+      args:
+        SOURCE: /todo
+    ports:
+      - 3000:3000
+    command: pnpm run start
+    depends_on:
+      - todo-db
+
+  auth-4:
+    build:
+      dockerfile: Dockerfile
+      args:
+        SOURCE: /auth
+    ports:
+      - 3001:3000
+    command: pnpm run start
+    depends_on:
+      - auth-db
+
+networks:
+  tpu-dev:
+    driver: bridge
